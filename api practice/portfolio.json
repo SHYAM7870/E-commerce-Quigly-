@@ -1,0 +1,32 @@
+[{
+    "NAME" :"Shyamsankar Kamila",
+    "ROLL" : "48",
+    "ADDRESS" : "Contai",
+    "EMAIL" : "kamilashyamsankar@gmail.com",
+    "CONTACT" : "1111111111",
+    "GENDER" : "MALE",
+    "IMAGE" : "profile.png",
+    "SKILLS" :{
+        "1" : "HTML",
+        "2" : "CSS",
+        "3" : "JS",
+        "4" :"PHP"
+    },
+    "COLLEGE":{
+            "DEGREE" : "BACHELOR OF COMPUTER APPLICATION",
+            "INSTITUTION" : "CONTAI COLLEGE OF LEARNING AND MANAGEMENT SCIENCE",
+            "SEM": "4-TH",
+            "YEAR" : "2024"
+    },
+    "HOBBIS" :{
+        "1" : "CODING",
+        "2" : "LEARNING",
+        "3" : "GAMING",
+        "4" : "EXCERCISE"
+    },
+    "SCHOOL" :{
+        "HIGH SCHOOL" : "KISHORENAGAR S.S. SADAN",
+        "PASS" :"HS",
+        "FINISH YEAR" :"2024"
+    }
+}]

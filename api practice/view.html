@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product View</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
+</head>
+
+<body class="p-3">
+
+<div class="container" id="productDetails"></div>
+
+<script>
+(async function () {
+    let param= new URLSearchParams(window.location.search);
+    // console.log(param);
+    let id=param.get('id');
+    // console.log(id);
+    let res = await fetch(`https://dummyjson.com/products/${id}`);
+    let product = await res.json();
+
+    let container = document.getElementById('productDetails');
+
+    container.innerHTML = `
+        <div class="row">
+
+            <div class="col-md-6">
+                <img src="${product.thumbnail}" class="img-fluid">
+            </div>
+
+            <div class="col-md-6">
+                <h2>${product.title}</h2>
+
+                <p>${product.description}</p>
+
+                <h4>₹ ${product.price}</h4>
+
+                <p><b>Brand:</b> ${product.brand}</p>
+                <p><b>Category:</b> ${product.category}</p>
+                <p><b>Rating:</b>  ${product.rating}</p>
+                <p><b>Stock:</b> ${product.stock}</p>
+
+                <button class="btn btn-success mt-3">Add to Cart</button>
+            </div>
+
+        </div>
+    `;
+
+})();
+</script>
+
+</body>
+</html>

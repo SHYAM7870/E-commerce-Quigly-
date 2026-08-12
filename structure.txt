@@ -1,0 +1,91 @@
+/quigly
+│
+├── /admin
+│   ├── /includes
+│   │   ├── header.php
+│   │   ├── footer.php
+│   │   ├── sidebar.php
+│   │   └── db.php
+│   │
+│   ├── /pages
+│   │   ├── dashboard.php
+│   │   ├── users/
+│   │   │   ├── list.php
+│   │   │   ├── add.php
+│   │   │   ├── edit.php
+│   │   │   └── view.php
+│   │   │
+│   │   ├── categories/
+│   │   │   ├── list.php
+│   │   │   ├── add.php
+│   │   │   ├── edit.php
+│   │   │
+│   │   ├── subcategories/
+│   │   │   ├── list.php
+│   │   │   ├── add.php
+│   │   │   ├── edit.php
+│   │   │
+│   │   ├── products/
+│   │   │   ├── list.php
+│   │   │   ├── add.php
+│   │   │   ├── edit.php
+│   │   │   ├── view.php
+│   │   │
+│   │   ├── orders/
+│   │   │   ├── list.php
+│   │   │   ├── view.php
+│   │
+│   ├── /actions
+│   │   ├── users/
+│   │   │   ├── add.php
+│   │   │   ├── update.php
+│   │   │   ├── delete.php
+│   │   │
+│   │   ├── categories/
+│   │   │   ├── add.php
+│   │   │   ├── update.php
+│   │   │   ├── delete.php
+│   │   │
+│   │   ├── subcategories/
+│   │   │   ├── add.php
+│   │   │   ├── update.php
+│   │   │   ├── delete.php
+│   │   │
+│   │   ├── products/
+│   │   │   ├── add.php
+│   │   │   ├── update.php
+│   │   │   ├── delete.php
+│   │   │
+│   │   ├── auth/
+│   │   │   ├── login.php
+│   │   │   ├── register.php
+│   │   │   ├── verify.php
+│
+├── /user   (customer side)
+│   ├── index.php
+│   ├── products.php
+│   ├── product.php
+│   ├── category.php
+│   ├── cart.php
+│   ├── checkout.php
+│   ├── orders.php
+│   ├── profile.php
+│
+├── /assets
+│   ├── /css
+│   ├── /js
+│   ├── /images
+│   ├── /upload   ← (IMPORTANT for products & users)
+│
+├── /config
+│   └── db.php   ← global DB (better than admin/includes/db.php only)
+│
+├── /functions
+│   ├── auth.php
+│   ├── helpers.php
+│   ├── mail.php
+│
+├── index.php   ← redirect to user/index.php
+├── login.php
+├── register.php
+├── verify.php
