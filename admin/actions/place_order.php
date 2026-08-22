@@ -1,9 +1,7 @@
 <?php
 // =============================================
-// FIX 2: place_order.php now returns JSON
-// Was: header("Location:...") → broke fetch().then(res => res.json())
-// Now: json_encode(['status'=>'success']) / ['status'=>'error']
-// Also keeps session auth check intact
+// place_order.php — JSON API with Razorpay support
+// Accepts razorpay_payment_id for CARD payments
 // =============================================
 session_start();
 header('Content-Type: application/json');
@@ -31,6 +29,7 @@ $name     = trim($_POST['name']     ?? '');
 $phone    = trim($_POST['phone']    ?? '');
 $address  = trim($_POST['address']  ?? '');
 $payment_method = trim($_POST['payment_method'] ?? 'COD');
+$razorpay_payment_id = trim($_POST['razorpay_payment_id'] ?? '');
 
 // Validate
 if ($product_id <= 0 || $name === '' || $phone === '' || $address === '') {
@@ -61,6 +60,19 @@ $name           = mysqli_real_escape_string($conn, $name);
 $phone          = mysqli_real_escape_string($conn, $phone);
 $address        = mysqli_real_escape_string($conn, $address);
 $payment_method = mysqli_real_escape_string($conn, $payment_method);
+$razorpay_payment_id = mysqli_real_escape_string($conn, $razorpay_payment_id);
+
+// If CARD payment with a valid Razorpay ID, mark as Paid
+$payment_status = 'Pending';
+if ($payment_method === 'CARD' && $razorpay_payment_id !== '') {
+    $payment_status = 'Paid';
+}
+
+// Auto-add razorpay_payment_id column if it doesn't exist
+$colCheck = mysqli_query($conn, "SHOW COLUMNS FROM orders LIKE 'razorpay_payment_id'");
+if ($colCheck && mysqli_num_rows($colCheck) === 0) {
+    mysqli_query($conn, "ALTER TABLE orders ADD COLUMN razorpay_payment_id VARCHAR(100) DEFAULT NULL AFTER payment_status");
+}
 
 mysqli_begin_transaction($conn);
 
@@ -69,11 +81,11 @@ try {
         INSERT INTO orders (
             user_id, total, status,
             customer_name, customer_email, customer_phone,
-            customer_address, payment_method, payment_status, product_id
+            customer_address, payment_method, payment_status, razorpay_payment_id, product_id
         ) VALUES (
             '$user_id', '$total', 'Processing',
             '$name', '$email', '$phone',
-            '$address', '$payment_method', 'Pending', '$product_id'
+            '$address', '$payment_method', '$payment_status', '$razorpay_payment_id', '$product_id'
         )
     ";
 
@@ -94,6 +106,24 @@ try {
 
     mysqli_commit($conn);
 
+    // Send confirmation email to user
+    try {
+        require_once __DIR__ . '/../../mail_function.php';
+        $errorMsg = '';
+        sendPaymentSuccessEmail(
+            $email,
+            $_POST['name'] ?? 'Customer',
+            $order_id,
+            $product['name'] ?? 'Product',
+            $total,
+            $payment_method,
+            $_POST['address'] ?? 'Shipping Address',
+            $errorMsg
+        );
+    } catch (Exception $e) {
+        error_log("Order confirmation email failed: " . $e->getMessage());
+    }
+
     echo json_encode([
         'status'   => 'success',
         'message'  => 'Order placed successfully',
@@ -104,3 +134,4 @@ try {
     mysqli_rollback($conn);
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 }
+

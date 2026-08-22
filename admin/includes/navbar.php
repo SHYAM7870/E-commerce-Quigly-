@@ -519,4 +519,37 @@ body.light-mode .navbar-toggler-icon {
         passive: true
     });
 })();
+
+// ── Close mobile navbar on outside click ──
+document.addEventListener('click', function(e) {
+    const navbarCollapse = document.getElementById('navbarNav');
+    const toggler = document.querySelector('.navbar-toggler');
+    if (!navbarCollapse || !toggler) return;
+
+    // Check if the collapse menu is currently open
+    const isOpen = navbarCollapse.classList.contains('show');
+    if (!isOpen) return;
+
+    // If click is outside the navbar, close it
+    const clickedInside = navbarCollapse.contains(e.target) || toggler.contains(e.target);
+    if (!clickedInside) {
+        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+        if (bsCollapse) {
+            bsCollapse.hide();
+        } else {
+            new bootstrap.Collapse(navbarCollapse, { toggle: true }).hide();
+        }
+    }
+});
+
+// ── Close mobile navbar when a nav link is clicked ──
+document.querySelectorAll('#navbarNav .nav-link, #navbarNav .dropdown-item, #navbarNav .icon-link').forEach(link => {
+    link.addEventListener('click', function() {
+        const navbarCollapse = document.getElementById('navbarNav');
+        if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+            const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+            if (bsCollapse) bsCollapse.hide();
+        }
+    });
+});
 </script>

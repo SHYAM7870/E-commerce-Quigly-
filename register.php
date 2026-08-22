@@ -239,78 +239,79 @@
                 padding: 25px !important;
             }
         }
-        .image-upload-card{
-            display:flex;
-            align-items:center;
-            gap:14px;
-            width:100%;
-            padding:16px;
-            border-radius:18px;
-            background: linear-gradient(135deg, rgba(37,99,235,.16), rgba(124,58,237,.16));
-            border:1px solid rgba(139,92,246,.35);
-            cursor:pointer;
-            transition:.3s ease;
+
+        .image-upload-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+            padding: 16px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(37, 99, 235, .16), rgba(124, 58, 237, .16));
+            border: 1px solid rgba(139, 92, 246, .35);
+            cursor: pointer;
+            transition: .3s ease;
         }
 
-        .image-upload-card:hover{
-            transform:translateY(-2px);
-            border-color:#8b5cf6;
-            box-shadow:0 12px 30px rgba(124,58,237,.18);
+        .image-upload-card:hover {
+            transform: translateY(-2px);
+            border-color: #8b5cf6;
+            box-shadow: 0 12px 30px rgba(124, 58, 237, .18);
         }
 
-        .upload-preview-wrap{
-            width:58px;
-            height:58px;
-            border-radius:16px;
-            overflow:hidden;
-            background:rgba(255,255,255,.08);
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            flex:0 0 auto;
-            position:relative;
+        .upload-preview-wrap {
+            width: 58px;
+            height: 58px;
+            border-radius: 16px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, .08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            position: relative;
         }
 
-        .upload-preview-wrap img{
-            width:100%;
-            height:100%;
-            object-fit:cover;
-            display:none;
+        .upload-preview-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
         }
 
-        .upload-icon{
-            font-size:22px;
-            color:#c4b5fd;
-            position:absolute;
+        .upload-icon {
+            font-size: 22px;
+            color: #c4b5fd;
+            position: absolute;
         }
 
-        .upload-text{
-            flex:1;
-            min-width:0;
-            display:flex;
-            flex-direction:column;
-            gap:2px;
+        .upload-text {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
         }
 
-        .upload-text strong{
-            color:#fff;
-            font-size:14px;
-            line-height:1.2;
+        .upload-text strong {
+            color: #fff;
+            font-size: 14px;
+            line-height: 1.2;
         }
 
-        .upload-text span{
-            color:#94a3b8;
-            font-size:12px;
+        .upload-text span {
+            color: #94a3b8;
+            font-size: 12px;
         }
 
-        .upload-action{
-            padding:10px 14px;
-            border-radius:14px;
-            background:linear-gradient(135deg,#2563eb,#7c3aed);
-            color:#fff;
-            font-weight:700;
-            font-size:13px;
-            flex:0 0 auto;
+        .upload-action {
+            padding: 10px 14px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: #fff;
+            font-weight: 700;
+            font-size: 13px;
+            flex: 0 0 auto;
         }
     </style>
 </head>
@@ -481,7 +482,8 @@
                                     Profile Image
                                 </label>
 
-                                <input type="file" name="image" id="image" accept="image/*" class="d-none" onchange="previewImage(event)">
+                                <input type="file" name="image" id="image" accept="image/*" class="d-none"
+                                    onchange="previewImage(event)">
 
                                 <label for="image" class="image-upload-card">
                                     <div class="upload-preview-wrap">
@@ -548,7 +550,6 @@
     </div>
 
     <script>
-
         let timer = 300;
         let interval;
 
@@ -577,17 +578,18 @@
             timer = 300;
             loader.style.display = "block";
 
+
             fetch("send_otp.php", {
 
                 method: "POST",
 
                 headers: {
-                    "Content-Type":
-                        "application/x-www-form-urlencoded"
+                    "Content-Type": "application/x-www-form-urlencoded"
                 },
 
-                body:
-                    "email=" + encodeURIComponent(email)
+                credentials: "same-origin",
+
+                body: "email=" + encodeURIComponent(email)
 
             })
 
@@ -616,6 +618,7 @@
                 })
 
                 .catch(() => {
+                    console.log(encodeURIComponent(email))
 
                     loader.style.display = "none";
 
@@ -645,12 +648,12 @@
                 method: "POST",
 
                 headers: {
-                    "Content-Type":
-                        "application/x-www-form-urlencoded"
+                    "Content-Type": "application/x-www-form-urlencoded"
                 },
 
-                body:
-                    "otp=" + encodeURIComponent(otp)
+                credentials: "same-origin",
+
+                body: "otp=" + encodeURIComponent(otp)
 
             })
 
@@ -696,6 +699,7 @@
                 });
 
         }
+
         function previewImage(event) {
             const file = event.target.files[0];
             const preview = document.getElementById("imagePreview");
@@ -711,6 +715,7 @@
                 sub.innerText = "Selected image";
             }
         }
+
         function startTimer() {
 
             interval = setInterval(() => {
@@ -749,7 +754,6 @@
     </div>
     `;
         }
-
     </script>
 
 </body>

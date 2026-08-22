@@ -1,5 +1,10 @@
 RewriteEngine On
 
-RewriteCond %{HTTPS} !=on
-RewriteCond %{HTTP_X_FORWARDED_PROTO} !https
-RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# Redirect HTTP to HTTPS (production only – comment out on localhost)
+# RewriteCond %{HTTPS} !=on
+# RewriteCond %{HTTP_X_FORWARDED_PROTO} !https
+# RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Serve landing.php when root /Quigly/ or /Quigly/index.html is requested directly
+# This does NOT affect /Quigly/index.php (the logged-in homepage)
+DirectoryIndex landing.php index.php

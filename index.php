@@ -3,7 +3,7 @@ session_start();
 include("admin/includes/db.php");
 
 if (!isset($_SESSION['email'])) {
-    header("Location: login.php");
+    header("Location: landing.php");
     exit;
 }
 
@@ -15,7 +15,7 @@ if (mysqli_num_rows($result) > 0) {
     $data = mysqli_fetch_assoc($result);
 } else {
     session_destroy();
-    header("Location: login.php");
+    header("Location: landing.php");
     exit;
 }
 
@@ -1221,6 +1221,10 @@ $trendingProducts = array_values(array_filter($products, function ($p) {
         }
     </style>
 
+
+<!-- Razorpay Checkout JS (Demo/Test Mode) -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 </head>
 <script>
     setTimeout(() => {
@@ -2078,6 +2082,27 @@ $trendingProducts = array_values(array_filter($products, function ($p) {
                     0
                 );
 
+            // ── CARD payment → Launch Razorpay ──
+            if (payment === 'CARD') {
+                launchRazorpay(name, phone, address, total);
+                return;
+            }
+
+            // ── COD / UPI → Direct order ──
+            submitOrder(name, phone, address, payment, total, '');
+        }
+
+        // ── Razorpay Integration (Simulated for Demo Mode) ──
+        function launchRazorpay(name, phone, address, total) {
+            if (typeof openRzpMockModal === 'function') {
+                openRzpMockModal(total);
+            } else {
+                console.error('openRzpMockModal is not defined.');
+            }
+        }
+
+        // ── Submit order to backend ──
+        function submitOrder(name, phone, address, payment, total, razorpayPaymentId) {
             const formData = new FormData();
 
             formData.append(
@@ -2109,6 +2134,10 @@ $trendingProducts = array_values(array_filter($products, function ($p) {
                 'payment_method',
                 payment
             );
+
+            if (razorpayPaymentId) {
+                formData.append('razorpay_payment_id', razorpayPaymentId);
+            }
 
             fetch(
                 'admin/actions/place_order.php', {
@@ -2998,25 +3027,56 @@ $trendingProducts = array_values(array_filter($products, function ($p) {
 
             // Build images array: gallery first, fallback to product.image
             let images = gallery.map(g => 'upload/' + g.image);
-            if (images.length === 0 && product.image) images = [product.image];
-
-            thumbStrip.innerHTML = '';
-            if (images.length <= 1) {
-                thumbStrip.style.display = 'none';
-                return;
+            if (images.length === 0 && product.image) {
+                // If the product image is relative path without upload/, append upload/
+                const isRelative = !product.image.startsWith('upload/') && !product.image.startsWith('http');
+                const srcPath = isRelative ? 'upload/' + product.image : product.image;
+                images = [srcPath];
             }
 
+            // For demo purposes: if we only have 1 image, populate some dummy copies to demonstrate the vertical list look
+            if (images.length === 1) {
+                images = [
+                    images[0],
+                    images[0],
+                    images[0],
+                    images[0],
+                    images[0],
+                    images[0],
+                    images[0]
+                ];
+            }
+
+            thumbStrip.innerHTML = '';
+            thumbStrip.className = 'thumb-strip-vertical';
             thumbStrip.style.display = 'flex';
+
+            const maxVisible = 6;
+            const hasMore = images.length > maxVisible;
+
             images.forEach((src, idx) => {
+                if (idx >= maxVisible) return;
+
                 const btn = document.createElement('button');
                 btn.type = 'button';
-                btn.className = 'thumb-btn' + (idx === 0 ? ' active' : '');
+                btn.className = 'thumb-btn-vertical' + (idx === 0 ? ' active' : '');
                 btn.dataset.src = src;
+
+                if (idx === maxVisible - 1 && hasMore) {
+                    btn.classList.add('more-indicator');
+                    btn.setAttribute('data-more', `5+`);
+                }
+
                 btn.innerHTML =
                     `<img src="${src}" alt="View ${idx + 1}" onerror="this.src='assets/images/no-image.png'">`;
                 btn.addEventListener('click', () => switchMainImage(src, btn));
                 thumbStrip.appendChild(btn);
             });
+
+            // Reset main image source to first image
+            if (images.length > 0) {
+                mainImg.src = images[0];
+            }
         }
 
         function switchMainImage(src, clickedBtn) {
@@ -3027,10 +3087,32 @@ $trendingProducts = array_values(array_filter($products, function ($p) {
                 mainImg.src = src;
                 mainImg.classList.remove('switching');
             }, 220);
-            // Update active thumb
-            document.querySelectorAll('.thumb-btn').forEach(b => b.classList.remove('active'));
+            
+            document.querySelectorAll('.thumb-btn-vertical').forEach(b => b.classList.remove('active'));
             if (clickedBtn) clickedBtn.classList.add('active');
         }
+
+        // ── Share & Full View Helpers ──
+        window.shareProduct = function() {
+            const title = document.getElementById('detailTitle')?.innerText || 'Product details';
+            if (navigator.share) {
+                navigator.share({
+                    title: title,
+                    url: window.location.href
+                }).catch(err => console.log('Share failed:', err));
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                showToast('Link Copied! 🔗', 'Product link copied to your clipboard.', 'success');
+            }
+        };
+
+        window.openFullViewImage = function(e) {
+            if (e) e.preventDefault();
+            const mainImg = document.getElementById('detailImage');
+            if (mainImg && mainImg.src) {
+                window.open(mainImg.src, '_blank');
+            }
+        };
 
         function renderVariants(sizes, colors, variants) {
             const variantSection = document.getElementById('variantSection');

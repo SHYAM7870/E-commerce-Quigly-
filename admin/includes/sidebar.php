@@ -476,6 +476,13 @@ $pendingSupportCount = (int) ($pendingSupport['total'] ?? 0);
         </a>
       </li>
       <li>
+        <a href="<?= BASE_URL ?>Pages/landing_page.php"
+          class="sb-link <?= ($current == 'landing_page.php') ? 'active' : '' ?>">
+          <i class="fas fa-globe"></i>
+          <span class="sb-text">Landing Page</span>
+        </a>
+      </li>
+      <li>
         <a href="<?= BASE_URL ?>Pages/product_list.php"
           class="sb-link <?= ($current == 'product_list.php') ? 'active' : '' ?>">
           <i class="fas fa-boxes-stacked"></i>

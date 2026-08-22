@@ -202,8 +202,362 @@
             </button>
         </div>
     </div>
+
+    <!-- ── Simulated Razorpay Modal ── -->
+    <div id="razorpayMockOverlay" class="rzp-mock-overlay d-none">
+        <div class="rzp-mock-card">
+            <button type="button" class="rzp-close" onclick="closeRzpMockModal()">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <!-- Header -->
+            <div class="rzp-mock-header">
+                <div class="rzp-merchant-info">
+                    <h4>Quigly Store</h4>
+                    <p>Order Payment</p>
+                    <div class="rzp-amount" id="rzpMockAmount">₹0.00</div>
+                </div>
+                <div class="rzp-logo-circle">Q</div>
+            </div>
+
+            <!-- Card Entry view -->
+            <div id="rzpMockCardView" class="rzp-mock-body">
+                <div class="section-title">Card Details (Demo Mode)</div>
+                <div class="rzp-form-group">
+                    <label>Card Number</label>
+                    <input type="text" id="rzpCardNo" class="rzp-input" placeholder="4111 1111 1111 1111" maxlength="19" oninput="formatCardNo(this)">
+                </div>
+                <div class="rzp-input-row">
+                    <div class="rzp-form-group">
+                        <label>Expiry Date</label>
+                        <input type="text" id="rzpCardExpiry" class="rzp-input" placeholder="MM/YY" maxlength="5" oninput="formatExpiry(this)">
+                    </div>
+                    <div class="rzp-form-group">
+                        <label>CVV</label>
+                        <input type="password" id="rzpCardCvv" class="rzp-input" placeholder="123" maxlength="3">
+                    </div>
+                </div>
+                <div class="rzp-form-group">
+                    <label>Card Holder Name</label>
+                    <input type="text" id="rzpCardName" class="rzp-input" placeholder="John Doe">
+                </div>
+                <button type="button" class="rzp-pay-btn" id="rzpPayBtn" onclick="processRzpMockPayment()">
+                    Pay Securely
+                </button>
+            </div>
+
+            <!-- Processing loading view -->
+            <div id="rzpMockProcessingView" class="rzp-mock-body d-none">
+                <div class="rzp-loading-container">
+                    <div class="rzp-spinner"></div>
+                    <h5 style="font-weight:700;margin-bottom:8px;">Processing Payment</h5>
+                    <p style="font-size:12px;color:#7f8e9d;">Do not close or refresh this page.</p>
+                </div>
+            </div>
+
+            <!-- Success view -->
+            <div id="rzpMockSuccessView" class="rzp-mock-body d-none">
+                <div class="rzp-success-container">
+                    <div class="rzp-success-circle">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h5 style="font-weight:700;margin-bottom:8px;color:#2beb87;">Payment Successful!</h5>
+                    <p style="font-size:12px;color:#7f8e9d;">Order is being created...</p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="rzp-footer">
+                <i class="fas fa-shield-alt"></i> Secured by <strong>Razorpay</strong>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Razorpay Mock Popup Overlay CSS */
+        .rzp-mock-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .rzp-mock-card {
+            width: 360px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 12px 36px rgba(0,0,0,0.3);
+            overflow: hidden;
+            color: #2b3940;
+            position: relative;
+            animation: rzpModalPop 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes rzpModalPop {
+            from { transform: scale(0.92); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .rzp-mock-header {
+            background: #17253a;
+            color: #ffffff;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .rzp-mock-header .rzp-merchant-info h4 {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0 0 3px;
+            letter-spacing: -0.2px;
+        }
+        .rzp-mock-header .rzp-merchant-info p {
+            font-size: 11px;
+            color: #98a4b3;
+            margin: 0 0 6px;
+        }
+        .rzp-mock-header .rzp-merchant-info .rzp-amount {
+            font-size: 18px;
+            font-weight: 800;
+            color: #2beb87;
+        }
+        .rzp-mock-header .rzp-logo-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #1372ec;
+            color: #ffffff;
+            font-weight: 900;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(19, 114, 236, 0.4);
+        }
+        .rzp-close {
+            position: absolute;
+            top: 12px;
+            right: 14px;
+            background: transparent;
+            border: none;
+            color: #7b8899;
+            font-size: 18px;
+            cursor: pointer;
+            transition: color 0.2s;
+            z-index: 10;
+        }
+        .rzp-close:hover {
+            color: #ffffff;
+        }
+        .rzp-mock-body {
+            padding: 22px 24px;
+            background: #f7f9fa;
+        }
+        .rzp-mock-body .section-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #7f8e9d;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 16px;
+        }
+        .rzp-form-group {
+            margin-bottom: 14px;
+        }
+        .rzp-form-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: #526375;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        .rzp-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d2dce5;
+            background: #ffffff;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #2b3940;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .rzp-input:focus {
+            border-color: #1372ec;
+            background: #ffffff;
+        }
+        .rzp-input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .rzp-pay-btn {
+            width: 100%;
+            padding: 12px;
+            background: #1372ec;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(19, 114, 236, 0.25);
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+        .rzp-pay-btn:hover {
+            background: #0f62cf;
+        }
+        .rzp-footer {
+            padding: 12px;
+            text-align: center;
+            background: #ffffff;
+            border-top: 1px solid #eef2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 10px;
+            color: #92a1b0;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .rzp-footer i {
+            font-size: 12px;
+            color: #1372ec;
+        }
+
+        /* Spinner / Success animations */
+        .rzp-loading-container, .rzp-success-container {
+            padding: 30px 10px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .rzp-spinner {
+            width: 44px;
+            height: 44px;
+            border: 3px solid rgba(19, 114, 236, 0.15);
+            border-top-color: #1372ec;
+            border-radius: 50%;
+            animation: rzpSpin 1s infinite linear;
+            margin-bottom: 18px;
+        }
+        @keyframes rzpSpin {
+            to { transform: rotate(360deg); }
+        }
+        .rzp-success-circle {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background: #2beb87;
+            color: #ffffff;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(43, 235, 135, 0.3);
+            margin-bottom: 18px;
+            animation: rzpPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes rzpPop {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+    </style>
 </section>
 <script>
+    function openRzpMockModal(total) {
+        document.getElementById('rzpMockAmount').innerText = '₹' + (total + 5).toFixed(2);
+        document.getElementById('rzpCardNo').value = '';
+        document.getElementById('rzpCardExpiry').value = '';
+        document.getElementById('rzpCardCvv').value = '';
+        document.getElementById('rzpCardName').value = '';
+        
+        document.getElementById('rzpMockCardView').classList.remove('d-none');
+        document.getElementById('rzpMockProcessingView').classList.add('d-none');
+        document.getElementById('rzpMockSuccessView').classList.add('d-none');
+        
+        document.getElementById('razorpayMockOverlay').classList.remove('d-none');
+    }
+
+    function closeRzpMockModal() {
+        document.getElementById('razorpayMockOverlay').classList.add('d-none');
+        showToast('Payment Cancelled', 'You can try again or choose another payment method.', 'error');
+    }
+
+    function formatCardNo(el) {
+        let val = el.value.replace(/\D/g, '');
+        let formatted = '';
+        for (let i = 0; i < val.length; i++) {
+            if (i > 0 && i % 4 === 0) formatted += ' ';
+            formatted += val[i];
+        }
+        el.value = formatted;
+    }
+
+    function formatExpiry(el) {
+        let val = el.value.replace(/\D/g, '');
+        if (val.length >= 2) {
+            el.value = val.slice(0, 2) + '/' + val.slice(2, 4);
+        } else {
+            el.value = val;
+        }
+    }
+
+    function processRzpMockPayment() {
+        const cardNo = document.getElementById('rzpCardNo').value.trim();
+        const expiry = document.getElementById('rzpCardExpiry').value.trim();
+        const cvv = document.getElementById('rzpCardCvv').value.trim();
+        const name = document.getElementById('rzpCardName').value.trim();
+        
+        if (cardNo.length < 15 || expiry.length < 5 || cvv.length < 3 || name === '') {
+            showToast('Error', 'Please fill valid Card details.', 'error');
+            return;
+        }
+        
+        // Show Processing Screen
+        document.getElementById('rzpMockCardView').classList.add('d-none');
+        document.getElementById('rzpMockProcessingView').classList.remove('d-none');
+        
+        setTimeout(() => {
+            // Show Success Screen
+            document.getElementById('rzpMockProcessingView').classList.add('d-none');
+            document.getElementById('rzpMockSuccessView').classList.remove('d-none');
+            
+            setTimeout(() => {
+                // Hide modal and finish
+                document.getElementById('razorpayMockOverlay').classList.add('d-none');
+                
+                // Call submitOrder
+                const checkoutName = document.getElementById('checkoutName')?.value.trim();
+                const checkoutPhone = document.getElementById('checkoutPhone')?.value.trim();
+                const checkoutAddress = document.getElementById('checkoutAddress')?.value.trim();
+                const totalText = document.getElementById('checkoutSubtotal').innerText;
+                const total = parseFloat(totalText.replace(/[^\d\.]/g, ''));
+                
+                const mockPaymentId = 'pay_mock_' + Math.random().toString(36).substr(2, 9).toUpperCase();
+                
+                if (typeof submitOrder === 'function') {
+                    submitOrder(checkoutName, checkoutPhone, checkoutAddress, 'CARD', total, mockPaymentId);
+                } else {
+                    // Fallback if defined differently
+                    placeOrderWithId(checkoutName, checkoutPhone, checkoutAddress, 'CARD', total, mockPaymentId);
+                }
+            }, 1200);
+        }, 1800);
+    }
+
     function openUpiPopup() {
         const popup = document.getElementById('upiPopup');
         if (popup) popup.classList.remove('d-none');
@@ -237,6 +591,11 @@
         const popup = document.getElementById('upiPopup');
         if (popup && e.target === popup) {
             closeUpiPopup();
+        }
+        
+        const rzpPopup = document.getElementById('razorpayMockOverlay');
+        if (rzpPopup && e.target === rzpPopup) {
+            closeRzpMockModal();
         }
     });
 </script>

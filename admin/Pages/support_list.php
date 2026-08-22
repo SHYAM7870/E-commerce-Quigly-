@@ -1,15 +1,34 @@
 <?php
 include_once __DIR__ . '/../includes/db.php';
 
-if (isset($_GET['close'])) {
-    $id = (int) $_GET['close'];
-
+// Handle Done Action
+if (isset($_GET['done'])) {
+    $id = (int) $_GET['done'];
     mysqli_query(
         $conn,
         "UPDATE support_tickets
-     SET status='Closed'
-     WHERE id='$id'
-     AND LOWER(status)!='closed'"
+         SET status='Done'
+         WHERE id='$id'"
+    );
+    $backStatus = $_GET['status'] ?? 'all';
+    $backPage = (int) ($_GET['page'] ?? 1);
+
+    header(
+        "Location: support_list.php?status=" .
+        urlencode($backStatus) .
+        "&page=" . $backPage
+    );
+    exit;
+}
+
+// Backwards compatibility for close
+if (isset($_GET['close'])) {
+    $id = (int) $_GET['close'];
+    mysqli_query(
+        $conn,
+        "UPDATE support_tickets
+         SET status='Done'
+         WHERE id='$id'"
     );
     $backStatus = $_GET['status'] ?? 'all';
     $backPage = (int) ($_GET['page'] ?? 1);
@@ -30,15 +49,16 @@ $limit = 10;
 $offset = ($page - 1) * $limit;
 
 $statusFilter = isset($_GET['status']) ? trim($_GET['status']) : 'all';
-$allowed = ['all', 'pending', 'replied', 'closed'];
+$allowed = ['all', 'pending', 'done'];
 if (!in_array($statusFilter, $allowed)) {
     $statusFilter = 'all';
 }
 
 $where = "WHERE 1=1";
-if ($statusFilter !== 'all') {
-    $statusSafe = mysqli_real_escape_string($conn, $statusFilter);
-    $where .= " AND LOWER(status) = '$statusSafe'";
+if ($statusFilter === 'pending') {
+    $where .= " AND LOWER(status) = 'pending'";
+} elseif ($statusFilter === 'done') {
+    $where .= " AND LOWER(status) IN ('done', 'closed', 'replied')";
 }
 
 function countTickets ($conn, $cond)
@@ -54,8 +74,7 @@ $totalPages = max(1, (int) ceil($totalTickets / $limit));
 $stats = [
     'all' => countTickets($conn, "WHERE 1=1"),
     'pending' => countTickets($conn, "WHERE LOWER(status)='pending'"),
-    'replied' => countTickets($conn, "WHERE LOWER(status)='replied'"),
-    'closed' => countTickets($conn, "WHERE LOWER(status)='closed'"),
+    'done' => countTickets($conn, "WHERE LOWER(status) IN ('done', 'closed', 'replied')"),
 ];
 
 $tickets = mysqli_query($conn, "
@@ -69,10 +88,9 @@ $tickets = mysqli_query($conn, "
 function statusBadge ($status)
 {
     $s = strtolower(trim($status));
-    if ($s === 'replied')
-        return ['class' => 'bg-success', 'label' => 'Replied'];
-    if ($s === 'closed')
-        return ['class' => 'bg-secondary', 'label' => 'Closed'];
+    if ($s === 'done' || $s === 'closed' || $s === 'replied') {
+        return ['class' => 'bg-success', 'label' => 'Done'];
+    }
     return ['class' => 'bg-warning text-dark', 'label' => 'Pending'];
 }
 ?>
@@ -177,16 +195,13 @@ function statusBadge ($status)
             <a href="?status=pending"
                 class="btn btn-sm <?= $statusFilter === 'pending' ? 'btn-primary' : 'btn-outline-primary' ?>">Pending
                 (<?= $stats['pending'] ?>)</a>
-            <a href="?status=replied"
-                class="btn btn-sm <?= $statusFilter === 'replied' ? 'btn-primary' : 'btn-outline-primary' ?>">Replied
-                (<?= $stats['replied'] ?>)</a>
-            <a href="?status=closed"
-                class="btn btn-sm <?= $statusFilter === 'closed' ? 'btn-primary' : 'btn-outline-primary' ?>">Closed
-                (<?= $stats['closed'] ?>)</a>
+            <a href="?status=done"
+                class="btn btn-sm <?= $statusFilter === 'done' ? 'btn-primary' : 'btn-outline-primary' ?>">Done
+                (<?= $stats['done'] ?>)</a>
         </div>
     </div>
 
-    <div class="support-stats">
+    <div class="support-stats" style="grid-template-columns: repeat(3, 1fr);">
         <div class="support-stat">
             <div class="num"><?= $stats['all'] ?></div>
             <div class="label">Total Requests</div>
@@ -196,12 +211,8 @@ function statusBadge ($status)
             <div class="label">Pending</div>
         </div>
         <div class="support-stat">
-            <div class="num"><?= $stats['replied'] ?></div>
-            <div class="label">Replied</div>
-        </div>
-        <div class="support-stat">
-            <div class="num"><?= $stats['closed'] ?></div>
-            <div class="label">Closed</div>
+            <div class="num"><?= $stats['done'] ?></div>
+            <div class="label">Done</div>
         </div>
     </div>
 
@@ -230,14 +241,16 @@ function statusBadge ($status)
                                 <td class="msg-preview"><?= htmlspecialchars($row['message']) ?></td>
                                 <td><span class="badge <?= $badge['class'] ?>"><?= $badge['label'] ?></span></td>
                                 <td>
-                                    <?php if (strtolower(trim($row['status'])) !== 'closed'): ?>
-                                        <a href="?close=<?= (int) $row['id'] ?>&status=<?= urlencode($statusFilter) ?>"
+                                    <?php 
+                                    $sLower = strtolower(trim($row['status']));
+                                    if ($sLower !== 'done' && $sLower !== 'closed' && $sLower !== 'replied'): ?>
+                                        <a href="?done=<?= (int) $row['id'] ?>&status=<?= urlencode($statusFilter) ?>"
                                             class="btn btn-sm btn-success"
-                                            onclick="return confirm('Mark this ticket as completed?')">
-                                            Completed
+                                            onclick="return confirm('Mark this support request as Done?')">
+                                            Mark as Done
                                         </a>
                                     <?php else: ?>
-                                        <span class="badge bg-secondary">Completed</span>
+                                        <span class="badge bg-secondary">Done</span>
                                     <?php endif; ?>
                                 </td>
                                 <td><?= date('d M Y, h:i A', strtotime($row['created_at'])) ?></td>
